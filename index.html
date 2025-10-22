@@ -1,13 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="utf-8"/>
-    <link rel="icon" href="/favicon.ico"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="icon" href="./favicon.ico"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
     <meta name="theme-color" content="#007aff"/>
-    <meta name="description" content="파트너즈 증권 거래소 - 실시간 주식 거래 시뮬레이션 게임"/>
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
-    <link rel="manifest" href="/manifest.json"/>
+    <meta name="description" content="파트너즈 증권 거래소 - 실시간 주식 거래 시뮬레이션 게임으로 팀별 투자 성과를 확인하세요"/>
+    <meta name="keywords" content="파트너즈, 증권, 주식, 투자, 시뮬레이션, 게임, 실시간"/>
+    
+    <!-- PWA 설정 -->
+    <link rel="manifest" href="./manifest.json"/>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="파트너즈 증권">
@@ -15,16 +17,154 @@
     <meta name="application-name" content="파트너즈 증권">
     <meta name="msapplication-TileColor" content="#007aff">
     <meta name="msapplication-tap-highlight" content="no">
-    <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
+    
+    <!-- 아이콘 설정 -->
+    <link rel="apple-touch-icon" href="./PRX_LOGO.png"/>
+    <link rel="apple-touch-startup-image" href="./PRX_STOCKMARKET_LOGO.png"/>
+    
     <title>파트너즈 증권 거래소</title>
+    
+    <!-- 외부 라이브러리 -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="socket-config.js"></script>
-    <script defer="defer" src="main.js"></script>
-    <link href="main.css" rel="stylesheet">
+    
+    <!-- Supabase 설정 -->
+    <script src="./config.js"></script>
+    <script type="module" src="./supabase-client.js"></script>
+    
+    <!-- 메인 애플리케이션 -->
+    <script defer="defer" src="./main.js"></script>
+    <link href="./main.css" rel="stylesheet">
+    
+    <!-- PWA 설치 프롬프트 스타일 -->
+    <style>
+        #install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #007aff;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+        }
+        #install-prompt button {
+            background: white;
+            color: #007aff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body style="margin:0;padding:0;background:#000;color:#fff">
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>JavaScript를 활성화해야 이 앱을 실행할 수 있습니다.</noscript>
     <div id="root" style="background:#000;min-height:100vh"></div>
+    
+    <!-- PWA 설치 프롬프트 -->
+    <div id="install-prompt">
+        <div style="text-align: center;">
+            <h3 style="margin: 0 0 10px 0;">📱 앱으로 설치하세요!</h3>
+            <p style="margin: 0 0 15px 0; font-size: 14px;">홈 화면에 추가하여 더 빠르게 접근하세요</p>
+            <button onclick="installPWA()">설치하기</button>
+            <button onclick="dismissInstallPrompt()">나중에</button>
+        </div>
+    </div>
+    
+    <!-- PWA 설치 및 Service Worker 등록 스크립트 -->
+    <script>
+        let deferredPrompt;
+        let installPromptShown = false;
+        
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker 등록 성공:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker 등록 실패:', error);
+                    });
+            });
+        }
+        
+        // PWA 설치 프롬프트 이벤트
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 설치 프롬프트가 아직 표시되지 않았다면 표시
+            if (!installPromptShown) {
+                showInstallPrompt();
+            }
+        });
+        
+        // 앱이 이미 설치되었는지 확인
+        window.addEventListener('appinstalled', function() {
+            console.log('PWA가 설치되었습니다');
+            hideInstallPrompt();
+        });
+        
+        function showInstallPrompt() {
+            const installPrompt = document.getElementById('install-prompt');
+            if (installPrompt && !installPromptShown) {
+                installPrompt.style.display = 'block';
+                installPromptShown = true;
+            }
+        }
+        
+        function hideInstallPrompt() {
+            const installPrompt = document.getElementById('install-prompt');
+            if (installPrompt) {
+                installPrompt.style.display = 'none';
+            }
+        }
+        
+        function dismissInstallPrompt() {
+            hideInstallPrompt();
+            // 24시간 후에 다시 표시할 수 있도록 설정
+            localStorage.setItem('installPromptDismissed', Date.now().toString());
+        }
+        
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('사용자가 PWA 설치를 수락했습니다');
+                    } else {
+                        console.log('사용자가 PWA 설치를 거부했습니다');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+            hideInstallPrompt();
+        }
+        
+        // 설치 프롬프트 표시 조건 확인
+        function shouldShowInstallPrompt() {
+            const dismissed = localStorage.getItem('installPromptDismissed');
+            if (dismissed) {
+                const dismissedTime = parseInt(dismissed);
+                const now = Date.now();
+                // 24시간(86400000ms) 후에 다시 표시
+                return (now - dismissedTime) > 86400000;
+            }
+            return true;
+        }
+        
+        // 페이지 로드 시 설치 프롬프트 표시 여부 확인
+        window.addEventListener('load', function() {
+            if (shouldShowInstallPrompt() && !installPromptShown) {
+                setTimeout(showInstallPrompt, 3000); // 3초 후 표시
+            }
+        });
+    </script>
 </body>
 </html>
 

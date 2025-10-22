@@ -1,15 +1,33 @@
 {
   "short_name": "파트너즈 증권",
-  "name": "파트너즈 증권 거래소",
+  "name": "파트너즈 증권 거래소 - 실시간 투자 시뮬레이션",
+  "description": "실시간 주식 거래 시뮬레이션 게임으로 팀별 투자 성과를 확인하세요",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "PRX_LOGO.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "PRX_STOCKMARKET_LOGO.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#007aff",
-  "background_color": "#000000"
+  "background_color": "#000000",
+  "categories": ["finance", "games", "entertainment"],
+  "lang": "ko",
+  "dir": "ltr"
 }
