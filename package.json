@@ -1,0 +1,26 @@
+{
+  "name": "partners-stock-pwa",
+  "version": "1.0.0",
+  "description": "파트너즈 증권 거래소 PWA",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'Building for production...'",
+    "deploy": "echo 'Deploying to GitHub Pages...'"
+  },
+  "keywords": ["pwa", "stock", "trading", "socket.io", "supabase"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
